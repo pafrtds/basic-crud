@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  mongodb:
+    image: mongo:5.0.2
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD
+    ports:
+      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
+    volumes:
+      - db:/data/db
+  api:
+    build: .
+    volumes:
+      - .:/project
+    ports:
+      - 8080:8080
+    working_dir: "/project"
+    command: bash -c "npm install && npm rebuild && npm start"
+    env_file: ./.env
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
+volumes:
+  db:
